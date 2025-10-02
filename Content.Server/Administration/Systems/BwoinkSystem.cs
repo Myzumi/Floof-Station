@@ -486,6 +486,7 @@ namespace Content.Server.Administration.Systems
             // Otherwise patch (edit) it
             if (existingEmbed.Id == null)
             {
+                // Floof: Changed to a Try/Catch block to handle network issues and refused connections
                 HttpResponseMessage request;
                 try
                 {
@@ -497,9 +498,10 @@ namespace Content.Server.Administration.Systems
                     _sawmill.Log(LogLevel.Error,
                         $"Webhook POST failed (network / refused) for user {userId}: {ex.Message}\n{ex}");
                     _relayMessages.Remove(userId);
-                    _processingChannels.Remove(userId); // Very Basic "Retry" logic, There might be times were Source or Target have temporarily network issues.
+                    _processingChannels.Remove(userId); // Floof: Very Basic "Retry" logic, There might be times were Source or Target have temporarily network issues.
                     return;
                 }
+                // Floof End
 
                 var content = await request.Content.ReadAsStringAsync();
                 if (!request.IsSuccessStatusCode)
@@ -507,7 +509,7 @@ namespace Content.Server.Administration.Systems
                     _sawmill.Log(LogLevel.Error,
                         $"Discord returned bad status code when posting message (perhaps the message is too long?): {request.StatusCode}\nResponse: {content}");
                     _relayMessages.Remove(userId);
-                    _processingChannels.Remove(userId); // Very Basic "Retry" logic, if post fails we discard the embed and make a new one
+                    _processingChannels.Remove(userId); // Floof: Very Basic "Retry" logic, if post fails we discard the embed and make a new one
                     return;
                 }
 
@@ -524,6 +526,7 @@ namespace Content.Server.Administration.Systems
             }
             else
             {
+                // Floof: Changed to a Try/Catch block to handle network issues and refused connections
                 HttpResponseMessage request;
                 try
                 {
@@ -535,9 +538,10 @@ namespace Content.Server.Administration.Systems
                     _sawmill.Log(LogLevel.Error,
                         $"Webhook PATCH failed (network / refused) for user {userId} (will discard current embed state): {ex.Message}\n{ex}");
                     _relayMessages.Remove(userId);
-                    _processingChannels.Remove(userId); // Very Basic "Retry" logic, There might be times were Source or Target have temporarily network issues.
+                    _processingChannels.Remove(userId); // Floof: Very Basic "Retry" logic, There might be times were Source or Target have temporarily network issues.
                     return;
                 }
+                // Floof End
 
                 if (!request.IsSuccessStatusCode)
                 {
@@ -545,7 +549,7 @@ namespace Content.Server.Administration.Systems
                     _sawmill.Log(LogLevel.Error,
                         $"Discord returned bad status code when patching message (perhaps the message is too long?): {request.StatusCode}\nResponse: {content}");
                     _relayMessages.Remove(userId);
-                    _processingChannels.Remove(userId); // Very Basic "Retry" logic, if patch fails we discard the embed and make a new one
+                    _processingChannels.Remove(userId); // Floof: Very Basic "Retry" logic, if patch fails we discard the embed and make a new one
                     return;
                 }
             }
@@ -574,6 +578,7 @@ namespace Content.Server.Administration.Systems
 
                     payload = GeneratePayload(message.ToString(), existingEmbed.Username, userId, existingEmbed.CharacterName);
 
+                    // Floof: Changed to a Try/Catch block to handle network issues and refused connections
                     HttpResponseMessage request;
                     try
                     {
@@ -587,6 +592,7 @@ namespace Content.Server.Administration.Systems
                         request = null!;
                     }
 
+
                     if (request != null)
                     {
                         var content = await request.Content.ReadAsStringAsync();
@@ -595,6 +601,7 @@ namespace Content.Server.Administration.Systems
                             _sawmill.Log(LogLevel.Error, $"Webhook returned bad status code when posting relay message (perhaps the message is too long?): {request.StatusCode}\nResponse: {content}");
                         }
                     }
+                    // Floof End
                 }
             }
             else
